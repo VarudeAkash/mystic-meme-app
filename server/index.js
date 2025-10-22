@@ -282,6 +282,10 @@ app.post('/api/generate-result', async (req, res) => {
       });
 
       result.imageUrl = imageResponse.data[0].url;
+
+      // Placeholder since image generation is disabled
+      // result.imageUrl = null;
+      
     } catch (imageError) {
       console.log('Image generation failed, using placeholder');
       result.imageUrl = null;
@@ -311,11 +315,251 @@ app.post('/api/generate-result', async (req, res) => {
     });
   }
 });
+// Generate Instagram Story Image with DALL-E result
+// Generate Instagram Story Image with DALL-E result - IMPROVED SPACING
+app.post('/api/generate-share-image', async (req, res) => {
+  const { title, description, vibeScore, spiritualAnimal, powerLevel, dalleImageUrl } = req.body;
 
+  try {
+    const { createCanvas, loadImage } = require('canvas');
+    
+    // Instagram Story dimensions
+    const width = 1080;
+    const height = 1920;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // 1. Create beautiful gradient background
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#0c0c2e');
+    gradient.addColorStop(0.5, '#1a1a4b');
+    gradient.addColorStop(1, '#2d1b69');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // 2. Add cosmic stars effect
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const radius = Math.random() * 2;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Load and draw DALL-E generated image (with proper spacing)
+    let imageLoaded = false;
+    let currentY = 120; // Track current Y position for proper spacing
+    
+    try {
+      if (dalleImageUrl) {
+        const image = await loadImage(dalleImageUrl);
+        imageLoaded = true;
+        
+        // Calculate dimensions with better spacing
+        const imageSize = 460; // Slightly smaller for better spacing
+        const x = (width - imageSize) / 2;
+        
+        // Draw image with rounded corners
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x, currentY, imageSize, imageSize, 40);
+        ctx.clip();
+        ctx.drawImage(image, x, currentY, imageSize, imageSize);
+        ctx.restore();
+
+        // Add border around image
+        ctx.strokeStyle = 'rgba(138, 110, 255, 0.8)';
+        ctx.lineWidth = 8;
+        ctx.roundRect(x, currentY, imageSize, imageSize, 40);
+        ctx.stroke();
+
+        // Update current Y position after image - ADDED MORE SPACE HERE
+        currentY += imageSize + 80; // Increased from 60 to 80 for more space after image
+      } else {
+        currentY = 200; // Start lower if no image
+      }
+    } catch (imageError) {
+      console.log('Could not load DALL-E image:', imageError);
+      imageLoaded = false;
+      currentY = 200; // Start lower if no image
+    }
+
+    // 4. Add personality title (with EVEN MORE space from image)
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 64px Arial';
+    ctx.textAlign = 'center';
+    
+    // Wrap title if too long
+    const titleLines = wrapText(ctx, title, width - 120, 64);
+    const titleLineHeight = 75;
+    
+    // ADD EXTRA SPACE BEFORE TITLE
+    currentY += 20; // Additional 20px padding before title starts
+    
+    titleLines.forEach((line, index) => {
+      ctx.fillText(line, width / 2, currentY + (index * titleLineHeight));
+    });
+    
+    // Update Y position after title
+    currentY += (titleLines.length * titleLineHeight) + 40;
+
+    // 5. Add description (with better boundaries and spacing)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = '30px Arial';
+    ctx.textAlign = 'center';
+    
+    const descriptionLines = wrapText(ctx, description, width - 120, 30);
+    const maxDescLines = 3;
+    const linesToShow = descriptionLines.slice(0, maxDescLines);
+    const descLineHeight = 42;
+    
+    linesToShow.forEach((line, index) => {
+      ctx.fillText(line, width / 2, currentY + (index * descLineHeight));
+    });
+    
+    // Update Y position after description
+    currentY += (linesToShow.length * descLineHeight) + 60;
+
+    // 6. Add stats section (with proper spacing and boundaries)
+    const statsBgHeight = 200;
+    const statsBgPadding = 40;
+    
+    // Ensure we have enough space
+    if (currentY + statsBgHeight > height - 300) {
+      currentY = height - 300 - statsBgHeight;
+    }
+    
+    // Stats background
+    ctx.fillStyle = 'rgba(138, 110, 255, 0.15)';
+    roundRect(ctx, statsBgPadding, currentY, width - (statsBgPadding * 2), statsBgHeight, 35);
+    ctx.fill();
+
+    // Stats labels
+    ctx.fillStyle = '#8a6eff';
+    ctx.font = 'bold 26px Arial';
+    const labelY = currentY + 60;
+    
+    ctx.fillText('Vibe Score', width * 0.25, labelY);
+    ctx.fillText('Spirit Animal', width * 0.5, labelY);
+    ctx.fillText('Power Level', width * 0.75, labelY);
+
+    // Stats values
+    ctx.fillStyle = '#ffffff';
+    const valueY = currentY + 120;
+    
+    // Vibe Score
+    ctx.font = 'bold 32px Arial';
+    ctx.fillText(`${vibeScore}/100`, width * 0.25, valueY);
+    
+    // Spirit Animal - handle wrapping with smaller font if needed
+    ctx.font = 'bold 28px Arial';
+    const animalMaxWidth = 200;
+    const animalLines = wrapText(ctx, spiritualAnimal, animalMaxWidth, 28);
+    
+    animalLines.forEach((line, index) => {
+      ctx.fillText(line, width * 0.5, valueY + (index * 35));
+    });
+    
+    // Power Level
+    ctx.font = 'bold 32px Arial';
+    ctx.fillText(`${powerLevel}/100`, width * 0.75, valueY);
+
+    // Update Y position after stats
+    currentY += statsBgHeight + 70;
+
+    // 7. Add app branding and URL (with boundary check)
+    const brandingY = Math.min(currentY, height - 200);
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '28px Arial';
+    ctx.fillText('Discover your vibe at:', width / 2, brandingY);
+    
+    ctx.fillStyle = '#ff6ec7';
+    ctx.font = 'bold 32px Arial';
+    ctx.fillText('vibecraft-ai.netlify.app', width / 2, brandingY + 50);
+
+    // 8. Add call-to-action (with boundary check)
+    const ctaY = Math.min(brandingY + 110, height - 120);
+    
+    ctx.fillStyle = 'rgba(255, 110, 199, 0.4)';
+    roundRect(ctx, width / 2 - 140, ctaY, 280, 70, 35);
+    ctx.fill();
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px Arial';
+    ctx.fillText('Tap to Play!', width / 2, ctaY + 45);
+
+    // 9. Add subtle footer/branding at the very bottom
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '22px Arial';
+    ctx.fillText('VibeCraft AI • Personality Quiz', width / 2, height - 40);
+
+    // Convert to buffer and send
+    const buffer = canvas.toBuffer('image/png');
+    
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="vibecraft-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png"`
+    });
+    
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Error generating share image:', error);
+    res.status(500).json({ error: 'Failed to generate share image' });
+  }
+});
+
+// Keep the same wrapText function
+function wrapText(ctx, text, maxWidth, fontSize) {
+  if (!text) return [''];
+  
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = '';
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && currentLine !== '') {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  
+  return lines;
+}
+
+// Keep the same roundRect function
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.arcTo(x + width, y, x + width, y + radius, radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+  ctx.lineTo(x + radius, y + height);
+  ctx.arcTo(x, y + height, x, y + height - radius, radius);
+  ctx.lineTo(x, y + radius);
+  ctx.arcTo(x, y, x + radius, y, radius);
+  ctx.closePath();
+}
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'Mystic Meme server is running!', questionCount: QUESTION_POOL.length });
 });
+
 
 app.listen(port, () => {
   console.log(`Mystic Meme server running on port ${port}`);
