@@ -329,6 +329,14 @@ app.post('/api/generate-share-image', async (req, res) => {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
+    // Preload fonts first
+    try {
+      ctx.font = '10px "Arial", "Helvetica", "sans-serif"';
+      ctx.fillText('', 0, 0);
+    } catch (fontError) {
+      console.log('Font preloading completed');
+    }
+
     // 1. Create beautiful gradient background
     const gradient = ctx.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, '#0c0c2e');
@@ -389,7 +397,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // 4. Add personality title (with EVEN MORE space from image)
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 64px Arial';
+    ctx.font = 'bold 64px "Arial", "Helvetica", "sans-serif"';
     ctx.textAlign = 'center';
     
     // Wrap title if too long
@@ -408,7 +416,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // 5. Add description (with better boundaries and spacing)
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = '30px Arial';
+    ctx.font = '30px "Arial", "Helvetica", "sans-serif"';
     ctx.textAlign = 'center';
     
     const descriptionLines = wrapText(ctx, description, width - 120, 30);
@@ -439,7 +447,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // Stats labels
     ctx.fillStyle = '#8a6eff';
-    ctx.font = 'bold 26px Arial';
+    ctx.font = 'bold 26px "Arial", "Helvetica", "sans-serif"';
     const labelY = currentY + 60;
     
     ctx.fillText('Vibe Score', width * 0.25, labelY);
@@ -451,11 +459,11 @@ app.post('/api/generate-share-image', async (req, res) => {
     const valueY = currentY + 120;
     
     // Vibe Score
-    ctx.font = 'bold 32px Arial';
+    ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText(`${vibeScore}/100`, width * 0.25, valueY);
     
     // Spirit Animal - handle wrapping with smaller font if needed
-    ctx.font = 'bold 28px Arial';
+    ctx.font = 'bold 28px "Arial", "Helvetica", "sans-serif"';
     const animalMaxWidth = 200;
     const animalLines = wrapText(ctx, spiritualAnimal, animalMaxWidth, 28);
     
@@ -464,7 +472,7 @@ app.post('/api/generate-share-image', async (req, res) => {
     });
     
     // Power Level
-    ctx.font = 'bold 32px Arial';
+    ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText(`${powerLevel}/100`, width * 0.75, valueY);
 
     // Update Y position after stats
@@ -474,11 +482,11 @@ app.post('/api/generate-share-image', async (req, res) => {
     const brandingY = Math.min(currentY, height - 200);
     
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '28px Arial';
+    ctx.font = '28px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('Discover your vibe at:', width / 2, brandingY);
     
     ctx.fillStyle = '#ff6ec7';
-    ctx.font = 'bold 32px Arial';
+    ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('vibecraft-ai.netlify.app', width / 2, brandingY + 50);
 
     // 8. Add call-to-action (with boundary check)
@@ -489,12 +497,12 @@ app.post('/api/generate-share-image', async (req, res) => {
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px Arial';
+    ctx.font = 'bold 28px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('Tap to Play!', width / 2, ctaY + 45);
 
     // 9. Add subtle footer/branding at the very bottom
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.font = '22px Arial';
+    ctx.font = '22px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('VibeCraft AI • Personality Quiz', width / 2, height - 40);
 
     // Convert to buffer and send
