@@ -87,22 +87,67 @@ function App() {
       }
     }
   };
-
-  const shareResult = () => {
-    if (result) {
-      const text = result.shareText;
-      const url = window.location.href;
+  const shareResult = async () => {
+    if (!result) {
+      alert('Please complete the quiz first!');
+      return;
+    }
+  
+    try {
+      setIsLoading(true);
       
-      if (navigator.share) {
-        navigator.share({
-          title: 'My Mystic Meme Result',
-          text: text,
-          url: url,
-        });
-      } else {
-        navigator.clipboard.writeText(`${text} ${url}`);
-        alert('Result copied to clipboard! 📋\nShare it with your friends!');
+      // Generate the shareable image with DALL-E result and text
+      const imageResponse = await fetch(`${API_URL}/api/generate-share-image`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: result.title,
+          description: result.description,
+          vibeScore: result.stats.vibeScore,
+          spiritualAnimal: result.stats.spiritualAnimal,
+          powerLevel: result.stats.powerLevel,
+          dalleImageUrl: result.imageUrl // Use the DALL-E generated image
+        }),
+      });
+  
+      if (!imageResponse.ok) {
+        throw new Error('Failed to generate share image');
       }
+  
+      // Convert response to blob and create download
+      const imageBlob = await imageResponse.blob();
+      const imageUrl = URL.createObjectURL(imageBlob);
+      
+      // Create download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = imageUrl;
+      downloadLink.download = `vibecraft-${result.title.toLowerCase().replace(/\s+/g, '-')}.png`;
+      
+      // Trigger download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+  
+      // Show success message with Instagram instructions
+      alert(`✅ SHAREABLE IMAGE DOWNLOADED! 🎨\n\n✨ "${result.title}" ✨\n\n📱 HOW TO SHARE ON INSTAGRAM:\n\n1. Open Instagram\n2. Create Story\n3. Select downloaded image from gallery\n4. Add LINK sticker:\n   - Tap sticker icon\n   - Choose "LINK"\n   - Paste: vibecraft-ai.netlify.app\n5. Share & tag friends! 🚀\n\nYour beautiful result image is ready to go viral!`);
+      
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(imageUrl), 1000);
+  
+    } catch (error) {
+      console.error('Error generating share image:', error);
+      
+      // Fallback to text sharing
+      const shareText = `🎭 "${result.title}" on VibeCraft AI! ✨\n\n${result.description}\n\n⭐ ${result.stats.vibeScore}/100 Vibe\n🐾 ${result.stats.spiritualAnimal}\n\n👇 vibecraft-ai.netlify.app`;
+      
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert(`✅ Copied text version! 📋\n\n"${result.title}"\n${result.description}\n\nShare this text on Instagram with a LINK sticker!`);
+      } catch (err) {
+        alert(`📱 Share "${result.title}" on Instagram!\n\n${result.description}\n\nDon't forget to add LINK sticker with: vibecraft-ai.netlify.app`);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -205,12 +250,28 @@ function App() {
             </div>
 
             <div className="action-buttons">
-              <button onClick={shareResult} className="share-button">
-                Share My Result 📤
-              </button>
+            <button 
+              onClick={shareResult} 
+              className="share-button"
+            >
+              Share to Instagram Story 📱
+            </button>
+
               <button onClick={restartQuiz} className="secondary-button">
                 Discover New Personality 🔄
               </button>
+            </div>
+
+            <div className="share-instructions">
+              <h4>📱 How to Share on Instagram Stories:</h4>
+              <ol>
+                <li>Tap "Share My Result" to download your image</li>
+                <li>Open Instagram and go to Stories</li>
+                <li>Select the downloaded image from your gallery</li>
+                <li>Add stickers, text, or tag friends!</li>
+                <li>Don't forget to include our link so friends can play too! 🎯</li>
+              </ol>
+              <p><strong>Pro Tip:</strong> Use the "Add Yours" sticker to start a chain! 🔗</p>
             </div>
 
             <div className="social-proof">
