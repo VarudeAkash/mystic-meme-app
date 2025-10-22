@@ -1,0 +1,12 @@
+{
+    "name": "mystic-meme-app",
+    "version": "1.0.0",
+    "description": "Mystic Meme - AI Personality Quiz",
+    "scripts": {
+      "build": "cd server && npm install",
+      "start": "cd server && npm start"
+    },
+    "engines": {
+      "node": "18.x"
+    }
+  }
