@@ -322,6 +322,25 @@ app.post('/api/generate-share-image', async (req, res) => {
 
   try {
     const { createCanvas, loadImage } = require('canvas');
+
+    // === ADD THIS FONT FIX RIGHT HERE ===
+    try {
+      // Try to register common Linux system fonts (Railway uses Linux)
+      registerFont('/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', { family: 'Arial', weight: 'bold' });
+      registerFont('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', { family: 'Arial' });
+      console.log('Arial fonts registered via Liberation Sans');
+    } catch (fontError) {
+      try {
+        // Alternative common font paths
+        registerFont('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', { family: 'Arial', weight: 'bold' });
+        registerFont('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', { family: 'Arial' });
+        console.log('Arial fonts registered via DejaVu Sans');
+      } catch (secondFontError) {
+        console.log('System fonts not available, using canvas defaults');
+        // Your existing code will work with fallback fonts
+      }
+    }
+    // === END OF FONT FIX ===
     
     // Instagram Story dimensions
     const width = 1080;
