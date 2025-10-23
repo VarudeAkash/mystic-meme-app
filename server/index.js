@@ -273,18 +273,18 @@ app.post('/api/generate-result', async (req, res) => {
 
     // Step 2: Generate AI image
     try {
-      // const imageResponse = await openai.images.generate({
-      //   model: "dall-e-3",
-      //   prompt: `Cartoon character illustration, ${result.imagePrompt}. Colorful, fun, viral meme style, digital art, clean background`,
-      //   size: "1024x1024",
-      //   quality: "standard",
-      //   n: 1,
-      // });
+      const imageResponse = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: `Cartoon character illustration, ${result.imagePrompt}. Colorful, fun, viral meme style, digital art, clean background`,
+        size: "1024x1024",
+        quality: "standard",
+        n: 1,
+      });
 
-      // result.imageUrl = imageResponse.data[0].url;
+      result.imageUrl = imageResponse.data[0].url;
 
       // Placeholder since image generation is disabled
-      result.imageUrl = null;
+      // result.imageUrl = null;
       
     } catch (imageError) {
       console.log('Image generation failed, using placeholder');
@@ -518,7 +518,7 @@ app.post('/api/generate-share-image', async (req, res) => {
     
     ctx.fillStyle = '#ff6ec7';
     ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
-    ctx.fillText('vibecraft-ai.netlify.app', width / 2, brandingY + 50);
+    ctx.fillText('vibecraft-ai.vercel.app', width / 2, brandingY + 50);
 
     // 8. Add call-to-action (with boundary check)
     const ctaY = Math.min(brandingY + 110, height - 120);
