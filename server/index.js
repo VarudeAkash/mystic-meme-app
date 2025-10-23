@@ -594,6 +594,32 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.arcTo(x, y, x + radius, y, radius);
   ctx.closePath();
 }
+
+// Add this to your server/index.js
+app.get('/api/test-canvas', (req, res) => {
+  try {
+    const { createCanvas } = require('canvas');
+    const canvas = createCanvas(200, 200);
+    const ctx = canvas.getContext('2d');
+    
+    // Test basic shapes (should always work)
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(0, 0, 200, 200);
+    
+    // Test text
+    ctx.fillStyle = 'white';
+    ctx.font = '20px sans-serif';
+    ctx.fillText('Canvas Test', 10, 100);
+    
+    const buffer = canvas.toBuffer('image/png');
+    
+    res.set('Content-Type', 'image/png');
+    res.send(buffer);
+  } catch (error) {
+    res.json({ error: error.message, stack: error.stack });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'Mystic Meme server is running!', questionCount: QUESTION_POOL.length });

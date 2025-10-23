@@ -1,0 +1,19 @@
+[build]
+builder = "nixpacks"
+
+[build.commands]
+install = "cd server && npm install"
+build = "cd server && npm run build || true"
+
+# ADD THESE FONT PACKAGES
+[build.packages]
+libfontconfig1 = "*"
+fonts-liberation = "*"
+fonts-dejavu = "*"
+fontconfig = "*"
+
+[deploy]
+startCommand = "cd server && npm start"
+
+[env]
+PORT = "8080"
