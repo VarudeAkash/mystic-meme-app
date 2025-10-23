@@ -323,24 +323,36 @@ app.post('/api/generate-share-image', async (req, res) => {
   try {
     const { createCanvas, loadImage } = require('canvas');
 
-    // === ADD THIS FONT FIX RIGHT HERE ===
+    // === SIMPLE FONT FIX - Use Google Fonts ===
     try {
-      // Try to register common Linux system fonts (Railway uses Linux)
-      registerFont('/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', { family: 'Arial', weight: 'bold' });
-      registerFont('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', { family: 'Arial' });
-      console.log('Arial fonts registered via Liberation Sans');
-    } catch (fontError) {
-      try {
-        // Alternative common font paths
-        registerFont('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', { family: 'Arial', weight: 'bold' });
-        registerFont('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', { family: 'Arial' });
-        console.log('Arial fonts registered via DejaVu Sans');
-      } catch (secondFontError) {
-        console.log('System fonts not available, using canvas defaults');
-        // Your existing code will work with fallback fonts
+      // Download and register a reliable web font
+      const https = require('https');
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Use Roboto as a reliable alternative to Arial
+      const fontUrl = 'https://github.com/google/fonts/raw/main/apache/roboto/Roboto%5Bwdth%2Cwght%5D.ttf';
+      const fontPath = path.join(__dirname, 'Roboto.ttf');
+      
+      // Download font if not exists
+      if (!fs.existsSync(fontPath)) {
+        const file = fs.createWriteStream(fontPath);
+        await new Promise((resolve, reject) => {
+          https.get(fontUrl, (response) => {
+            response.pipe(file);
+            file.on('finish', () => {
+              file.close(resolve);
+            });
+          }).on('error', reject);
+        });
       }
+      
+      registerFont(fontPath, { family: 'Arial' });
+      console.log('Roboto font registered as Arial');
+    } catch (fontError) {
+      console.log('Web font download failed, using system defaults');
     }
-    // === END OF FONT FIX ===
+    // === END FONT FIX ===
     
     // Instagram Story dimensions
     const width = 1080;
