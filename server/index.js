@@ -323,36 +323,36 @@ app.post('/api/generate-share-image', async (req, res) => {
   try {
     const { createCanvas, loadImage } = require('canvas');
 
-    // === SIMPLE FONT FIX - Use Google Fonts ===
-    try {
-      // Download and register a reliable web font
-      const https = require('https');
-      const fs = require('fs');
-      const path = require('path');
+    // // === SIMPLE FONT FIX - Use Google Fonts ===
+    // try {
+    //   // Download and register a reliable web font
+    //   const https = require('https');
+    //   const fs = require('fs');
+    //   const path = require('path');
       
-      // Use Roboto as a reliable alternative to Arial
-      const fontUrl = 'https://github.com/google/fonts/raw/main/apache/roboto/Roboto%5Bwdth%2Cwght%5D.ttf';
-      const fontPath = path.join(__dirname, 'Roboto.ttf');
+    //   // Use Roboto as a reliable alternative to Arial
+    //   const fontUrl = 'https://github.com/google/fonts/raw/main/apache/roboto/Roboto%5Bwdth%2Cwght%5D.ttf';
+    //   const fontPath = path.join(__dirname, 'Roboto.ttf');
       
-      // Download font if not exists
-      if (!fs.existsSync(fontPath)) {
-        const file = fs.createWriteStream(fontPath);
-        await new Promise((resolve, reject) => {
-          https.get(fontUrl, (response) => {
-            response.pipe(file);
-            file.on('finish', () => {
-              file.close(resolve);
-            });
-          }).on('error', reject);
-        });
-      }
+    //   // Download font if not exists
+    //   if (!fs.existsSync(fontPath)) {
+    //     const file = fs.createWriteStream(fontPath);
+    //     await new Promise((resolve, reject) => {
+    //       https.get(fontUrl, (response) => {
+    //         response.pipe(file);
+    //         file.on('finish', () => {
+    //           file.close(resolve);
+    //         });
+    //       }).on('error', reject);
+    //     });
+    //   }
       
-      registerFont(fontPath, { family: 'Arial' });
-      console.log('Roboto font registered as Arial');
-    } catch (fontError) {
-      console.log('Web font download failed, using system defaults');
-    }
-    // === END FONT FIX ===
+    //   registerFont(fontPath, { family: 'Arial' });
+    //   console.log('Roboto font registered as Arial');
+    // } catch (fontError) {
+    //   console.log('Web font download failed, using system defaults');
+    // }
+    // // === END FONT FIX ===
     
     // Instagram Story dimensions
     const width = 1080;
@@ -362,7 +362,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // Preload fonts first
     // try {
-    //   ctx.font = '10px sans-serif';
+    //   ctx.font = '10px "Arial", "Helvetica", "sans-serif"';
     //   ctx.fillText('', 0, 0);
     // } catch (fontError) {
     //   console.log('Font preloading completed');
@@ -428,7 +428,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // 4. Add personality title (with EVEN MORE space from image)
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 64px sans-serif';
+    ctx.font = 'bold 64px "Arial", "Helvetica", "sans-serif"';
     ctx.textAlign = 'center';
     
     // Wrap title if too long
@@ -447,7 +447,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // 5. Add description (with better boundaries and spacing)
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = '30px sans-serif';
+    ctx.font = '30px "Arial", "Helvetica", "sans-serif"';
     ctx.textAlign = 'center';
     
     const descriptionLines = wrapText(ctx, description, width - 120, 30);
@@ -478,7 +478,7 @@ app.post('/api/generate-share-image', async (req, res) => {
 
     // Stats labels
     ctx.fillStyle = '#8a6eff';
-    ctx.font = 'bold 26px sans-serif';
+    ctx.font = 'bold 26px "Arial", "Helvetica", "sans-serif"';
     const labelY = currentY + 60;
     
     ctx.fillText('Vibe Score', width * 0.25, labelY);
@@ -490,11 +490,11 @@ app.post('/api/generate-share-image', async (req, res) => {
     const valueY = currentY + 120;
     
     // Vibe Score
-    ctx.font = 'bold 32px sans-serif';
+    ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText(`${vibeScore}/100`, width * 0.25, valueY);
     
     // Spirit Animal - handle wrapping with smaller font if needed
-    ctx.font = 'bold 28px sans-serif';
+    ctx.font = 'bold 28px "Arial", "Helvetica", "sans-serif"';
     const animalMaxWidth = 200;
     const animalLines = wrapText(ctx, spiritualAnimal, animalMaxWidth, 28);
     
@@ -503,7 +503,7 @@ app.post('/api/generate-share-image', async (req, res) => {
     });
     
     // Power Level
-    ctx.font = 'bold 32px sans-serif';
+    ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText(`${powerLevel}/100`, width * 0.75, valueY);
 
     // Update Y position after stats
@@ -513,11 +513,11 @@ app.post('/api/generate-share-image', async (req, res) => {
     const brandingY = Math.min(currentY, height - 200);
     
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '28px sans-serif';
+    ctx.font = '28px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('Discover your vibe at:', width / 2, brandingY);
     
     ctx.fillStyle = '#ff6ec7';
-    ctx.font = 'bold 32px sans-serif';
+    ctx.font = 'bold 32px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('vibecraft-ai.netlify.app', width / 2, brandingY + 50);
 
     // 8. Add call-to-action (with boundary check)
@@ -528,12 +528,12 @@ app.post('/api/generate-share-image', async (req, res) => {
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px sans-serif';
+    ctx.font = 'bold 28px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('Tap to Play!', width / 2, ctaY + 45);
 
     // 9. Add subtle footer/branding at the very bottom
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.font = '22px sans-serif';
+    ctx.font = '22px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('VibeCraft AI • Personality Quiz', width / 2, height - 40);
 
     // Convert to buffer and send
@@ -608,7 +608,7 @@ app.get('/api/test-canvas', (req, res) => {
     
     // Test text
     ctx.fillStyle = 'white';
-    ctx.font = '20px sans-serif';
+    ctx.font = '20px "Arial", "Helvetica", "sans-serif"';
     ctx.fillText('Canvas Test', 10, 100);
     
     const buffer = canvas.toBuffer('image/png');
